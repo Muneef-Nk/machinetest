@@ -53,30 +53,22 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fetchProductDetails({required int id, required String slug}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
+    final uri = Uri.parse(
+      "${ApiConstants.apiBaseUrl}"
+      "${ApiConstants.productDetails}/$slug",
+    );
 
-    if (token == null) {
-      throw Exception("User session not found");
-    }
+    print("URL: $uri");
 
-    final url =
-        "${ApiConstants.apiBaseUrl}${ApiConstants.productDetails}/$slug"
-        "?id=$id&token=$token&store=swan";
-
-    print("==== PRODUCT DETAILS API ====");
-    print("URL: $url");
-
-    final response = await http.get(Uri.parse(url));
+    final response = await http.post(uri, body: {"id": id.toString(), "store": "swan"});
 
     print("Status Code: ${response.statusCode}");
-    print("Response Body: ${response.body}");
-    print("==============================");
+    print("Response: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to load product details. Status: ${response.statusCode}");
+      throw Exception("Failed: ${response.statusCode} - ${response.body}");
     }
   }
 }

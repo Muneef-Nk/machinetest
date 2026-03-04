@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:machine_test/models/homemodel.dart';
-import 'package:provider/provider.dart';
 
-import '../../providers/auth_provider.dart';
+import '../../core/constants/api_constants.dart';
+import '../../models/homemodel.dart';
 import '../../services/api_service.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -32,8 +31,21 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     try {
       final data = await _apiService.fetchProductDetails(id: widget.productId, slug: widget.slug);
 
+      print("DETAILS RESPONSE: $data");
+
+      if (data == null) {
+        throw Exception("Empty response from server");
+      }
+
+      // Adjust according to your real API structure
+      final productJson = data["product"] ?? data["data"]?["product"] ?? data["product_details"];
+
+      if (productJson == null) {
+        throw Exception("Product data not found in response");
+      }
+
       setState(() {
-        product = ProductModel.fromJson(data["product"]);
+        product = ProductModel.fromJson(productJson);
         isLoading = false;
       });
     } catch (e) {
@@ -42,6 +54,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         isLoading = false;
       });
     }
+  }
+
+  String? get fullImageUrl {
+    if (product?.image == null || product!.image!.isEmpty) {
+      return null;
+    }
+
+    return "${ApiConstants.imageBaseUrl}"
+        "${ApiConstants.productImagePath}"
+        "${product!.image}";
   }
 
   @override
@@ -58,11 +80,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     }
 
     if (error != null) {
-      return Center(child: Text(error!));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            error!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      );
     }
 
     if (product == null) {
-      return const Center(child: Text("No Data"));
+      return const Center(child: Text("No Product Found"));
     }
 
     return SingleChildScrollView(
@@ -70,20 +101,33 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Image
-          Image.network(
-            product!.image ?? "",
-            height: 250,
-            width: double.infinity,
-            fit: BoxFit.cover,
+          /// Product Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: fullImageUrl != null
+                ? Image.network(
+                    fullImageUrl!,
+                    height: 250,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const SizedBox(
+                        height: 250,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => Container(height: 250, color: Colors.grey[200]),
+                  )
+                : Container(height: 250, color: Colors.grey[200]),
           ),
 
           const SizedBox(height: 20),
 
-          /// Name
+          /// Product Name
           Text(
             product!.name ?? "",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -92,7 +136,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           Text(
             "QAR ${product!.price ?? ""}",
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -100,8 +144,29 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           const SizedBox(height: 20),
 
-          /// Description
-          // Text(product!.productId ?? ""),
+          /// Category (if exists)
+          if (product!.category != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                product!.category!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 20),
+
+          /// Description Title
+          const Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+          const SizedBox(height: 10),
         ],
       ),
     );

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:machine_test/core/constants/api_constants.dart';
+import 'package:machine_test/core/utils/app_routes.dart';
 import 'package:machine_test/models/homemodel.dart';
-import 'package:machine_test/screens/product/product_details_screen.dart';
+import 'package:machine_test/providers/cart_provider.dart';
+import 'package:provider/provider.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductModel product;
@@ -20,14 +22,10 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
+        Navigator.pushNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailsScreen(
-              productId: widget.product.productId!,
-              slug: widget.product.slug!,
-            ),
-          ),
+          AppRoutes.productDetails,
+          arguments: {'productId': widget.product.productId!, 'slug': widget.product.slug!},
         );
       },
       child: Container(
@@ -153,7 +151,8 @@ class _ProductCardState extends State<ProductCard> {
                 height: 36,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: handle add to cart
+                    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                    cartProvider.addToCart(widget.product);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
