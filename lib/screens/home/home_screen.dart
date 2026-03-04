@@ -56,53 +56,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final data = provider.homeData!;
 
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: [
-        _buildBannerSlider(data.banner1),
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Reload home data
+        await provider.loadHomeData();
+      },
+      child: ListView(
+        padding: const EdgeInsets.all(12),
+        children: [
+          _buildBannerSlider(data.banner1),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Categories"),
-        const SizedBox(height: 10),
-        _buildCategories(data.categories),
+          _sectionTitle("Categories"),
+          const SizedBox(height: 10),
+          _buildCategories(data.categories),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Featured Products"),
-        const SizedBox(height: 10),
-        _buildHorizontalProducts(data.bestSeller),
+          _sectionTitle("Featured Products"),
+          const SizedBox(height: 10),
+          _buildHorizontalProducts(data.ourProducts),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Daily Best Selling"),
-        const SizedBox(height: 10),
-        _buildHorizontalProducts(data.bestSeller),
+          _sectionTitle("Daily Best Selling"),
+          const SizedBox(height: 10),
+          _buildHorizontalProducts(data.bestSeller),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _buildBannerSlider(data.banner2),
+          _buildBannerSlider(data.banner2),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Recently Added"),
-        const SizedBox(height: 10),
-        _buildHorizontalProducts(data.newArrivals),
+          _sectionTitle("Recently Added"),
+          const SizedBox(height: 10),
+          _buildHorizontalProducts(data.newArrivals),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Popular Products"),
-        const SizedBox(height: 10),
-        _buildHorizontalProducts(data.ourProducts),
+          _sectionTitle("Popular Products"),
+          const SizedBox(height: 10),
+          _buildHorizontalProducts(data.suggestedProducts),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        _sectionTitle("Trending Products"),
-        const SizedBox(height: 10),
-        _buildHorizontalProducts(data.flashSale),
+          _sectionTitle("Trending Products"),
+          const SizedBox(height: 10),
+          _buildHorizontalProducts(data.flashSale),
 
-        const SizedBox(height: 20),
-      ],
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
