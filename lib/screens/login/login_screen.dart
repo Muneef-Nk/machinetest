@@ -133,14 +133,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 50,
                             child: ElevatedButton(
                               onPressed: authProvider.isLoading ? null : _login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                                  return primaryColor; // Always same color
+                                }),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                               ),
                               child: authProvider.isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  ? const SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
                                   : const Text(
                                       "Login",
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

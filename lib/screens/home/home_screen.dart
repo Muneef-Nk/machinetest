@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<HomeProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: Image.asset("assets/logo.png"),
         elevation: 0,
@@ -59,29 +59,25 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        /// 🔶 Banner Slider
         _buildBannerSlider(data.banner1),
 
         const SizedBox(height: 20),
 
-        /// 🟤 Categories
         _sectionTitle("Categories"),
         const SizedBox(height: 10),
         _buildCategories(data.categories),
 
         const SizedBox(height: 20),
 
-        /// 🔵 Trending Products
         _sectionTitle("Featured Products"),
         const SizedBox(height: 10),
         _buildHorizontalProducts(data.bestSeller),
 
         const SizedBox(height: 20),
 
-        /// 🔴 Daily Best Selling
         _sectionTitle("Daily Best Selling"),
         const SizedBox(height: 10),
-        _buildHorizontalProducts(data.flashSale),
+        _buildHorizontalProducts(data.bestSeller),
 
         const SizedBox(height: 20),
 
@@ -89,32 +85,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
         const SizedBox(height: 20),
 
-        /// 🟢 Recently Added
         _sectionTitle("Recently Added"),
         const SizedBox(height: 10),
         _buildHorizontalProducts(data.newArrivals),
 
         const SizedBox(height: 20),
 
-        /// 🟡 Popular Products (Grid)
         _sectionTitle("Popular Products"),
         const SizedBox(height: 10),
-        _buildGridProducts(data.ourProducts),
+        _buildHorizontalProducts(data.ourProducts),
 
         const SizedBox(height: 20),
 
         _sectionTitle("Trending Products"),
         const SizedBox(height: 10),
-        _buildGridProducts(data.flashSale),
+        _buildHorizontalProducts(data.flashSale),
 
         const SizedBox(height: 20),
       ],
     );
   }
-
-  // ===========================
-  // BANNER SLIDER
-  // ===========================
 
   Widget _buildBannerSlider(List<BannerModel> banners) {
     if (banners.isEmpty) return const SizedBox();
@@ -126,37 +116,33 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, index) {
           final banner = banners[index];
 
-          return Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              image: banner.image != null && banner.image!.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(
-                        "${ApiConstants.imageBaseUrl}"
-                        "${ApiConstants.bannerImagePath}"
-                        "${banner.image}",
-                      ),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-              color: Colors.orange.shade100,
-            ),
-            child: Image.network(
+          final imageUrl =
               "${ApiConstants.imageBaseUrl}"
               "${ApiConstants.bannerImagePath}"
-              "${banner.image}",
-              fit: BoxFit.cover,
+              "${banner.image}";
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: banner.image != null && banner.image!.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.orange.shade100,
+                          child: const Center(child: Icon(Icons.image_not_supported)),
+                        );
+                      },
+                    )
+                  : Container(color: Colors.orange.shade100),
             ),
           );
         },
       ),
     );
   }
-
-  // ===========================
-  // CATEGORIES
-  // ===========================
 
   Widget _buildCategories(List<CategoryModel> categories) {
     return SizedBox(
@@ -175,7 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 28,
                   backgroundColor: Colors.brown.shade200,
                   backgroundImage: category.image != null && category.image!.isNotEmpty
-                      ? NetworkImage(category.image!)
+                      ? NetworkImage(
+                          "${ApiConstants.imageBaseUrl}"
+                          "${ApiConstants.categoryImagePath}"
+                          "${category.image}",
+                        )
                       : null,
                   child: category.image == null || category.image!.isEmpty
                       ? Text(
@@ -203,14 +193,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ===========================
-  // HORIZONTAL PRODUCTS
-  // ===========================
   Widget _buildHorizontalProducts(List<ProductModel> products) {
     if (products.isEmpty) return const SizedBox();
 
     return SizedBox(
-      height: 230,
+      height: 250,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: products.length,
@@ -222,65 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ===========================
-  // GRID PRODUCTS
-  // ===========================
-
-  Widget _buildGridProducts(List<ProductModel> products) {
-    if (products.isEmpty) return const SizedBox();
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.1,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemBuilder: (context, index) {
-        final product = products[index];
-
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-          child: Column(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    product.image ?? "",
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(color: Colors.grey[200]),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                product.name ?? "",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "QAR ${product.price ?? ""}",
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-              ),
-            ],
-          ),
-        );
-      },
+  Widget _sectionTitle(String title, {VoidCallback? onTap}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        InkWell(onTap: onTap, child: const Icon(Icons.arrow_forward_ios, size: 16)),
+      ],
     );
-  }
-
-  // ===========================
-  // PROMO BANNER
-  // ===========================
-
-  Widget _sectionTitle(String title) {
-    return Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
   }
 }

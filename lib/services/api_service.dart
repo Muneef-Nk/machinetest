@@ -51,4 +51,32 @@ class ApiService {
       throw Exception("Failed to load home data");
     }
   }
+
+  Future<Map<String, dynamic>> fetchProductDetails({required int id, required String slug}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    if (token == null) {
+      throw Exception("User session not found");
+    }
+
+    final url =
+        "${ApiConstants.apiBaseUrl}${ApiConstants.productDetails}/$slug"
+        "?id=$id&token=$token&store=swan";
+
+    print("==== PRODUCT DETAILS API ====");
+    print("URL: $url");
+
+    final response = await http.get(Uri.parse(url));
+
+    print("Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+    print("==============================");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load product details. Status: ${response.statusCode}");
+    }
+  }
 }
