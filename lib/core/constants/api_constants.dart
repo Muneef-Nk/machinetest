@@ -1,17 +1,19 @@
 class ApiConstants {
-  static const baseUrl = "https://sungod.demospro2023.in.net/api";
+  ApiConstants._();
 
-  static const imageBaseUrl = "https://sungod.demospro2023.in.net";
+  // Base URLs
+  static const String apiBaseUrl = "https://sungod.demospro2023.in.net/api";
 
-  static const bannerImage = "$imageBaseUrl/images/bannert/";
+  static const String imageBaseUrl = "https://sungod.demospro2023.in.net";
 
-  static const productImage = "$imageBaseUrl/images/product/";
+  // Image Paths
+  static const String bannerImagePath = "/images/bannert/";
+  static const String productImagePath = "/images/product/";
+  static const String categoryImagePath = "/images/category/";
 
-  static const categoryImage = "$imageBaseUrl/images/category/";
-
-  static const testEmail = "mobile@alisonsgroup.com";
-  static const testPassword = "12345678";
-
-  static const id = "xWO";
-  static const token = "ah5Ddu3QeQmNmIlDEF4fdIzNYaGxPrxqoK29Jsnh";
+  // Endpoints
+  static const String login = "/login";
+  static const String home = "/home/en";
+  static const String products = "/products/en";
+  static const String productDetails = "/product-details/en";
 }
